@@ -1,499 +1,1138 @@
 <!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petable Automaton AI — The AI That Builds, Automates, Codes, and Executes</title>
+    <meta name="description" content="World's most advanced AI automation platform & multi-agent app builder. Generate full-stack apps, workflows, code, and deployments in seconds.">
+    <meta property="og:title" content="Petable Automaton AI">
+    <meta property="og:description" content="The AI That Builds, Automates, Codes, and Executes. Next-Gen Multi-Agent Autonomous Development.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS & Plugins -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        purple: {
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                        },
+                        dark: {
+                            950: '#07090e',
+                            900: '#0d1117',
+                            850: '#121721',
+                            800: '#161b26',
+                            750: '#1f2636',
+                            700: '#2a3447',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 3s ease-in-out infinite alternate',
+                        'float': 'float 6s ease-in-out infinite',
+                        'border-glow': 'borderGlow 3s linear infinite',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { opacity: '0.4', filter: 'drop-shadow(0 0 15px rgba(59,130,246,0.5))' },
+                            '100%': { opacity: '0.8', filter: 'drop-shadow(0 0 30px rgba(139,92,246,0.8))' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        },
+                        borderGlow: {
+                            '0%, 100%': { borderColor: 'rgba(59,130,246,0.4)' },
+                            '50%': { borderColor: 'rgba(168,85,247,0.8)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Glassmorphism Custom CSS */
+        .glass-panel {
+            background: rgba(18, 23, 33, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-panel-light {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .glass-nav {
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .glow-gradient-text {
+            background: linear-gradient(135deg, #60A5FA 0%, #A855F7 50%, #EC4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glow-button {
+            background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.35);
+            transition: all 0.3s ease;
+        }
+        .glow-button:hover {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+            transform: translateY(-1px);
+        }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(7, 9, 14, 0.5); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* Grid Background Pattern */
+        .bg-grid-pattern {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-dark-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-purple-600 selection:text-white overflow-x-hidden"
+      x-data="automatonApp()" 
+      x-init="initApp()" 
+      @keydown.window.cmd.k.prevent="commandPaletteOpen = true" 
+      @keydown.window.ctrl.k.prevent="commandPaletteOpen = true"
+      @keydown.escape.window="commandPaletteOpen = false; activeModal = null">
+
+    <!-- Ambient Glowing Background Orbs -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute top-1/3 -right-40 w-[30rem] h-[30rem] bg-purple-600/20 rounded-full blur-[140px] animate-glow"></div>
+        <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-cyan-500/15 rounded-full blur-[120px]"></div>
+        <div class="absolute inset-0 bg-grid-pattern opacity-60"></div>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div class="relative z-10 flex flex-col min-h-screen">
+        
+        <!-- TOP NAVIGATION BAR -->
+        <header class="sticky top-0 z-40 glass-nav h-16 px-4 lg:px-6 flex items-center justify-between border-b border-white/10">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer" @click="currentView = 'workspace'">
+                <div class="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-purple-600 to-pink-500 p-0.5 shadow-lg shadow-purple-500/20 flex items-center justify-center">
+                    <div class="w-full h-full bg-dark-900 rounded-[10px] flex items-center justify-center">
+                        <i data-lucide="bot" class="w-5 h-5 text-purple-400"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-lg tracking-tight text-white font-mono">Petable <span class="glow-gradient-text">Automaton</span></span>
+                        <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">AI v3.5 Pro</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 -mt-1 hidden sm:block">The Autonomous Development Engine</p>
+                </div>
+            </div>
+
+            <!-- View Navigation Switcher -->
+            <nav class="hidden md:flex items-center space-x-1 bg-dark-900/80 p-1 rounded-xl border border-white/10">
+                <button @click="currentView = 'workspace'" :class="currentView === 'workspace' ? 'bg-purple-600 text-white font-medium shadow' : 'text-slate-400 hover:text-slate-200'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center space-x-1.5">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>Studio Hub</span>
+                </button>
+                <button @click="currentView = 'agents'" :class="currentView === 'agents' ? 'bg-purple-600 text-white font-medium shadow' : 'text-slate-400 hover:text-slate-200'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center space-x-1.5">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+                    <span>16 AI Agents</span>
+                </button>
+                <button @click="currentView = 'workflow'" :class="currentView === 'workflow' ? 'bg-purple-600 text-white font-medium shadow' : 'text-slate-400 hover:text-slate-200'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center space-x-1.5">
+                    <i data-lucide="git-merge" class="w-3.5 h-3.5"></i>
+                    <span>Workflow Canvas</span>
+                </button>
+                <button @click="currentView = 'ide'" :class="currentView === 'ide' ? 'bg-purple-600 text-white font-medium shadow' : 'text-slate-400 hover:text-slate-200'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center space-x-1.5">
+                    <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
+                    <span>Code Studio</span>
+                </button>
+                <button @click="currentView = 'marketplace'" :class="currentView === 'marketplace' ? 'bg-purple-600 text-white font-medium shadow' : 'text-slate-400 hover:text-slate-200'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center space-x-1.5">
+                    <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+                    <span>Store</span>
+                </button>
+            </nav>
+
+            <!-- Top Right Action Controls & User Auth -->
+            <div class="flex items-center space-x-3">
+                <!-- Search Trigger -->
+                <button @click="commandPaletteOpen = true" class="hidden sm:flex items-center space-x-2 bg-dark-900/90 border border-white/10 hover:border-purple-500/50 px-3 py-1.5 rounded-xl text-xs text-slate-400 transition">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <span>Search or Command...</span>
+                    <kbd class="px-1.5 py-0.5 text-[10px] bg-dark-800 border border-white/10 rounded text-slate-300">⌘K</kbd>
+                </button>
+
+                <!-- Project Quick Export -->
+                <button @click="exportProject('zip')" class="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 text-xs font-medium transition">
+                    <i data-lucide="download" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <span>Export ZIP</span>
+                </button>
+
+                <!-- User Session / Login Button -->
+                <template x-if="!userLoggedIn">
+                    <button @click="openAuthModal()" class="glow-button px-4 py-1.5 rounded-xl text-xs font-semibold text-white flex items-center space-x-2">
+                        <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                        <span>Sign In</span>
+                    </button>
+                </template>
+                <template x-if="userLoggedIn">
+                    <div class="relative" x-data="{ userMenuOpen: false }">
+                        <button @click="userMenuOpen = !userMenuOpen" class="flex items-center space-x-2.5 bg-dark-900 border border-white/10 hover:border-purple-500/50 p-1.5 pr-3 rounded-xl transition">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" class="w-7 h-7 rounded-lg object-cover ring-1 ring-purple-500/50" alt="Avatar">
+                            <span class="text-xs font-medium text-slate-200 hidden sm:inline">Alex Rivera</span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                        </button>
+
+                        <div x-show="userMenuOpen" @click.away="userMenuOpen = false" x-transition class="absolute right-0 mt-2 w-56 glass-panel rounded-2xl shadow-2xl py-2 z-50 border border-white/10">
+                            <div class="px-4 py-2 border-b border-white/10">
+                                <p class="text-xs font-semibold text-white">Alex Rivera</p>
+                                <p class="text-[10px] text-slate-400">alex.rivera@petable.ai</p>
+                                <span class="inline-block mt-1 px-2 py-0.5 bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[9px] font-bold rounded">BUSINESS PLAN</span>
+                            </div>
+                            <button @click="currentView = 'analytics'; userMenuOpen = false" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center space-x-2">
+                                <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-purple-400"></i>
+                                <span>Analytics & Tokens</span>
+                            </button>
+                            <button @click="currentView = 'admin'; userMenuOpen = false" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center space-x-2">
+                                <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                <span>Admin Panel</span>
+                            </button>
+                            <button @click="currentView = 'pricing'; userMenuOpen = false" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center space-x-2">
+                                <i data-lucide="credit-card" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span>Subscription & Billing</span>
+                            </button>
+                            <button @click="currentView = 'settings'; userMenuOpen = false" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center space-x-2">
+                                <i data-lucide="sliders" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span>System Settings</span>
+                            </button>
+                            <div class="border-t border-white/10 my-1"></div>
+                            <button @click="userLoggedIn = false; userMenuOpen = false" class="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center space-x-2">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </header>
+
+        <!-- MAIN VIEW WRAPPER -->
+        <main class="flex-1 flex overflow-hidden relative">
+
+            <!-- ================= VIEW 1: STUDIO HUB / WORKSPACE (MAIN PROMPT & WORKSPACE) ================= -->
+            <template x-if="currentView === 'workspace'">
+                <div class="flex-1 flex flex-col xl:flex-row h-[calc(100vh-4rem)] overflow-hidden">
+                    
+                    <!-- Left Column: Prompt Input & Multi-Agent Execution Progress -->
+                    <div class="w-full xl:w-2/5 flex flex-col border-b xl:border-b-0 xl:border-r border-white/10 bg-dark-900/60 p-4 lg:p-6 overflow-y-auto">
+                        
+                        <!-- Main Hero Header -->
+                        <div class="mb-6">
+                            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-medium mb-3">
+                                <i data-lucide="zap" class="w-3.5 h-3.5 text-purple-400"></i>
+                                <span>Autonomous Multi-Agent Orchestration</span>
+                            </div>
+                            <h1 class="text-2xl lg:text-3xl font-bold text-white tracking-tight">What would you like to build today?</h1>
+                            <p class="text-xs lg:text-sm text-slate-400 mt-1">Describe any app, website, Python bot, workflow, or business model. 16 AI agents will build it live.</p>
+                        </div>
+
+                        <!-- Prompt Input Box -->
+                        <div class="glass-panel p-4 rounded-2xl border border-white/10 shadow-2xl relative mb-6 focus-within:ring-2 focus-within:ring-purple-500/50 transition">
+                            <textarea 
+                                x-model="userPrompt" 
+                                @keydown.enter.prevent="if(!e.shiftKey) runAutomatonGeneration()"
+                                rows="3" 
+                                class="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none resize-none" 
+                                placeholder="E.g., Build a complete SaaS landing page with dark mode, interactive pricing simulator, and Stripe API setup..."></textarea>
+                            
+                            <!-- Prompt Tools Bar -->
+                            <div class="flex items-center justify-between pt-3 border-t border-white/10 mt-2">
+                                <div class="flex items-center space-x-2 text-slate-400">
+                                    <button @click="triggerFileUpload()" class="p-1.5 hover:bg-white/5 rounded-lg hover:text-purple-400 transition" title="Attach PDF, Code, Images">
+                                        <i data-lucide="paperclip" class="w-4 h-4"></i>
+                                    </button>
+                                    <button @click="toggleVoiceMode()" :class="voiceActive ? 'text-red-400 bg-red-500/10' : ''" class="p-1.5 hover:bg-white/5 rounded-lg hover:text-purple-400 transition" title="Voice Input">
+                                        <i data-lucide="mic" class="w-4 h-4"></i>
+                                    </button>
+                                    <button @click="selectAgentPreset()" class="p-1.5 hover:bg-white/5 rounded-lg hover:text-purple-400 transition" title="Select Primary Agent">
+                                        <i data-lucide="bot" class="w-4 h-4"></i>
+                                    </button>
+                                    <span class="text-[11px] text-slate-500 hidden sm:inline" x-text="uploadedFiles.length > 0 ? uploadedFiles.length + ' file attached' : 'No attachments'"></span>
+                                </div>
+
+                                <button 
+                                    @click="runAutomatonGeneration()" 
+                                    :disabled="isGenerating || !userPrompt.trim()"
+                                    class="glow-button px-5 py-2 rounded-xl text-xs font-semibold text-white flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <template x-if="!isGenerating">
+                                        <span class="flex items-center space-x-1.5">
+                                            <span>Generate & Execute</span>
+                                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                        </span>
+                                    </template>
+                                    <template x-if="isGenerating">
+                                        <span class="flex items-center space-x-2">
+                                            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                                            <span>Orchestrating...</span>
+                                        </span>
+                                    </template>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Suggested Quick Prompts -->
+                        <div class="mb-6">
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Instant Starter Prompts</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <template x-for="starter in starterPrompts" :key="starter.title">
+                                    <button @click="userPrompt = starter.prompt; runAutomatonGeneration()" class="p-2.5 rounded-xl glass-panel hover:bg-white/10 text-left border border-white/5 hover:border-purple-500/30 transition group">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <i :data-lucide="starter.icon" class="w-4 h-4 text-purple-400 group-hover:scale-110 transition"></i>
+                                            <span class="text-xs font-semibold text-slate-200 group-hover:text-purple-300" x-text="starter.title"></span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 line-clamp-1" x-text="starter.subtitle"></p>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Multi-Agent Live Progress Stream -->
+                        <div class="flex-1 glass-panel rounded-2xl p-4 border border-white/10 flex flex-col">
+                            <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
+                                <div class="flex items-center space-x-2">
+                                    <span class="relative flex h-2.5 w-2.5">
+                                      <span :class="isGenerating ? 'animate-ping bg-emerald-400' : 'bg-slate-500'" class="absolute inline-flex h-full w-full rounded-full opacity-75"></span>
+                                      <span :class="isGenerating ? 'bg-emerald-500' : 'bg-slate-500'" class="relative inline-flex rounded-full h-2.5 w-2.5"></span>
+                                    </span>
+                                    <h3 class="text-xs font-semibold text-white uppercase tracking-wider">Agent Pipeline Execution Log</h3>
+                                </div>
+                                <span class="text-[10px] text-purple-400 font-mono" x-text="isGenerating ? activeAgentStepName : 'Agent Engine Idle'"></span>
+                            </div>
+
+                            <!-- Agent Steps Checklist -->
+                            <div class="space-y-2 overflow-y-auto max-h-60 pr-1">
+                                <template x-for="(step, index) in agentSteps" :key="index">
+                                    <div class="flex items-center justify-between text-xs p-2 rounded-lg bg-dark-950/40 border border-white/5">
+                                        <div class="flex items-center space-x-2.5">
+                                            <div class="w-6 h-6 rounded-md flex items-center justify-center font-mono text-[10px] font-bold"
+                                                 :class="step.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 
+                                                         step.status === 'active' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 animate-pulse' : 
+                                                         'bg-slate-800 text-slate-500'">
+                                                <template x-if="step.status === 'completed'"><i data-lucide="check" class="w-3.5 h-3.5"></i></template>
+                                                <template x-if="step.status === 'active'"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i></template>
+                                                <template x-if="step.status === 'pending'"><span x-text="index + 1"></span></template>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-slate-200" x-text="step.name"></p>
+                                                <p class="text-[10px] text-slate-400" x-text="step.agent"></p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-mono text-slate-400" x-text="step.time"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Interactive Live Preview & Code Artifact Split Screen -->
+                    <div class="w-full xl:w-3/5 flex flex-col bg-dark-950 relative overflow-hidden">
+                        
+                        <!-- Top Toolbar for Live Preview -->
+                        <div class="h-12 bg-dark-900 border-b border-white/10 px-4 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xs font-medium text-slate-300 flex items-center space-x-1.5">
+                                    <i data-lucide="globe" class="w-3.5 h-3.5 text-blue-400"></i>
+                                    <span>Live Autonomous Application Preview</span>
+                                </span>
+                                <!-- Device Selector Switcher -->
+                                <div class="flex items-center bg-dark-800 p-0.5 rounded-lg border border-white/10">
+                                    <button @click="activePreviewDevice = 'desktop'" :class="activePreviewDevice === 'desktop' ? 'bg-purple-600 text-white' : 'text-slate-400'" class="p-1 rounded text-xs transition" title="Desktop View">
+                                        <i data-lucide="monitor" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button @click="activePreviewDevice = 'tablet'" :class="activePreviewDevice === 'tablet' ? 'bg-purple-600 text-white' : 'text-slate-400'" class="p-1 rounded text-xs transition" title="Tablet View">
+                                        <i data-lucide="tablet" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button @click="activePreviewDevice = 'mobile'" :class="activePreviewDevice === 'mobile' ? 'bg-purple-600 text-white' : 'text-slate-400'" class="p-1 rounded text-xs transition" title="Mobile View">
+                                        <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-2">
+                                <button @click="refreshPreview()" class="p-1.5 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition" title="Refresh Sandbox">
+                                    <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button @click="openInNewTab()" class="p-1.5 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition" title="Open Fullscreen">
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button @click="currentView = 'ide'" class="px-2.5 py-1 bg-purple-600/20 text-purple-300 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg text-xs font-medium transition flex items-center space-x-1">
+                                    <i data-lucide="code" class="w-3 h-3"></i>
+                                    <span>Edit Source Code</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sandbox Canvas Container -->
+                        <div class="flex-1 bg-dark-900/40 p-4 flex items-center justify-center overflow-auto relative">
+                            <!-- Preview Frame Shell -->
+                            <div :class="activePreviewDevice === 'mobile' ? 'w-[375px] h-[667px]' : activePreviewDevice === 'tablet' ? 'w-[768px] h-[600px]' : 'w-full h-full'"
+                                 class="bg-dark-900 rounded-2xl border border-white/10 shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
+                                
+                                <!-- Mock Browser Header -->
+                                <div class="h-8 bg-dark-800/80 px-3 flex items-center space-x-2 border-b border-white/10">
+                                    <div class="flex space-x-1.5">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                                    </div>
+                                    <div class="flex-1 px-3">
+                                        <div class="w-full bg-dark-950/80 rounded-md py-0.5 px-3 text-[10px] text-slate-400 font-mono truncate border border-white/5 flex items-center justify-between">
+                                            <span>https://app.petable-automaton.sandbox/live-build</span>
+                                            <i data-lucide="lock" class="w-2.5 h-2.5 text-emerald-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Live Interactive Render Frame -->
+                                <div class="flex-1 relative bg-dark-950 overflow-auto">
+                                    <!-- Dynamic Render Container -->
+                                    <iframe id="previewFrame" class="w-full h-full border-none" :srcdoc="currentPreviewHtml"></iframe>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ================= VIEW 2: MULTI-AGENT ORCHESTRATOR ================= -->
+            <template x-if="currentView === 'agents'">
+                <div class="flex-1 p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-white/10 pb-6 mb-6 gap-4">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h1 class="text-2xl font-bold text-white">16 Autonomous AI Agents</h1>
+                                <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30">Active Mesh</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Specialized AI models collaborating real-time to plan, program, design, test, and deploy applications.</p>
+                        </div>
+                        <button @click="triggerAllAgentSync()" class="glow-button px-4 py-2 rounded-xl text-xs font-semibold text-white flex items-center space-x-2">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                            <span>Sync Agent Knowledge</span>
+                        </button>
+                    </div>
+
+                    <!-- Agents Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <template x-for="agent in agentSystemList" :key="agent.name">
+                            <div class="glass-panel p-5 rounded-2xl border border-white/10 hover:border-purple-500/40 transition flex flex-col justify-between group">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center group-hover:scale-110 transition">
+                                            <i :data-lucide="agent.icon" class="w-5 h-5 text-purple-400"></i>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase" 
+                                              :class="agent.status === 'Ready' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'"
+                                              x-text="agent.status"></span>
+                                    </div>
+                                    <h3 class="text-sm font-bold text-white mb-1" x-text="agent.name"></h3>
+                                    <p class="text-xs text-slate-400 mb-3 line-clamp-2" x-text="agent.role"></p>
+                                </div>
+                                <div class="pt-3 border-t border-white/5 flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-500 font-mono" x-text="agent.model"></span>
+                                    <button @click="configureAgent(agent)" class="text-xs text-purple-400 hover:text-purple-300 font-medium">Configure →</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ================= VIEW 3: DRAG-AND-DROP WORKFLOW BUILDER ================= -->
+            <template x-if="currentView === 'workflow'">
+                <div class="flex-1 flex flex-col h-[calc(100vh-4rem)] bg-dark-950 relative overflow-hidden">
+                    
+                    <!-- Workflow Top Bar -->
+                    <div class="h-14 glass-nav px-6 flex items-center justify-between border-b border-white/10">
+                        <div class="flex items-center space-x-3">
+                            <h2 class="text-sm font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="git-merge" class="w-4 h-4 text-purple-400"></i>
+                                <span>Visual Automation Canvas</span>
+                            </h2>
+                            <span class="text-xs text-slate-400 border-l border-white/10 pl-3">SaaS Automation Workflow #104</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button @click="addWorkflowNode('AI Decision')" class="px-3 py-1.5 bg-dark-800 hover:bg-dark-750 border border-white/10 rounded-xl text-xs text-slate-200 flex items-center space-x-1.5 transition">
+                                <i data-lucide="plus" class="w-3.5 h-3.5 text-purple-400"></i>
+                                <span>Add Node</span>
+                            </button>
+                            <button @click="executeWorkflow()" class="glow-button px-4 py-1.5 rounded-xl text-xs font-semibold text-white flex items-center space-x-1.5">
+                                <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                                <span>Run Pipeline</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow Interactive Canvas -->
+                    <div class="flex-1 bg-grid-pattern relative p-8 flex items-center justify-center overflow-auto">
+                        
+                        <!-- Connecting Workflow Flow Diagram -->
+                        <div class="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-8 max-w-6xl w-full">
+                            <template x-for="(node, index) in workflowNodes" :key="node.id">
+                                <div class="flex flex-col md:flex-row items-center">
+                                    <!-- Node Card -->
+                                    <div class="w-64 glass-panel p-4 rounded-2xl border border-white/10 hover:border-purple-500/50 transition shadow-2xl relative group">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-500/20 text-purple-300" x-text="node.type"></span>
+                                            <i data-lucide="more-horizontal" class="w-4 h-4 text-slate-500 hover:text-white cursor-pointer"></i>
+                                        </div>
+                                        <h4 class="text-xs font-bold text-white mb-1" x-text="node.label"></h4>
+                                        <p class="text-[11px] text-slate-400 mb-3" x-text="node.desc"></p>
+                                        <div class="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-white/5">
+                                            <span x-text="node.status"></span>
+                                            <span class="font-mono text-purple-400" x-text="node.latency"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Connector Line -->
+                                    <template x-if="index < workflowNodes.length - 1">
+                                        <div class="flex items-center justify-center py-3 md:py-0 md:px-4 text-purple-500">
+                                            <i data-lucide="arrow-right" class="w-6 h-6 animate-pulse hidden md:block"></i>
+                                            <i data-lucide="arrow-down" class="w-6 h-6 animate-pulse block md:hidden"></i>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ================= VIEW 4: CODE STUDIO (IDE & TERMINAL) ================= -->
+            <template x-if="currentView === 'ide'">
+                <div class="flex-1 flex h-[calc(100vh-4rem)] overflow-hidden">
+                    
+                    <!-- File Explorer Sidebar -->
+                    <div class="w-64 bg-dark-900 border-r border-white/10 flex flex-col">
+                        <div class="p-3 border-b border-white/10 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Project Files</span>
+                            <div class="flex space-x-1">
+                                <button @click="createNewFile()" class="p-1 hover:bg-white/5 rounded text-slate-400 hover:text-white"><i data-lucide="file-plus" class="w-3.5 h-3.5"></i></button>
+                                <button class="p-1 hover:bg-white/5 rounded text-slate-400 hover:text-white"><i data-lucide="folder-plus" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Tree Files -->
+                        <div class="flex-1 overflow-y-auto py-2">
+                            <template x-for="file in projectFiles" :key="file.name">
+                                <button @click="selectActiveFile(file)" 
+                                        :class="activeFileName === file.name ? 'bg-purple-600/20 text-purple-300 border-l-2 border-purple-500' : 'text-slate-400 hover:bg-white/5'"
+                                        class="w-full text-left px-4 py-1.5 text-xs font-mono flex items-center space-x-2 transition">
+                                    <i :data-lucide="file.icon" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <span x-text="file.name"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Code Editor Central Canvas -->
+                    <div class="flex-1 flex flex-col bg-dark-950">
+                        <!-- Code Tabs -->
+                        <div class="h-10 bg-dark-900 border-b border-white/10 flex items-center px-2 space-x-1 overflow-x-auto">
+                            <template x-for="file in projectFiles" :key="file.name">
+                                <div @click="selectActiveFile(file)"
+                                     :class="activeFileName === file.name ? 'bg-dark-950 text-purple-300 border-t-2 border-purple-500' : 'text-slate-400 hover:bg-dark-800'"
+                                     class="px-3 py-1.5 text-xs font-mono cursor-pointer flex items-center space-x-2 rounded-t-lg transition">
+                                    <span x-text="file.name"></span>
+                                    <button @click.stop="" class="hover:text-rose-400"><i data-lucide="x" class="w-3 h-3"></i></button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Textarea / Monaco Mock Editor -->
+                        <div class="flex-1 p-4 font-mono text-xs text-slate-200 bg-dark-950 overflow-auto relative">
+                            <textarea 
+                                x-model="activeFileContent" 
+                                class="w-full h-full bg-transparent text-slate-200 font-mono focus:outline-none resize-none leading-relaxed" 
+                                spellcheck="false"></textarea>
+                        </div>
+
+                        <!-- Interactive Terminal Console -->
+                        <div class="h-44 bg-dark-900 border-t border-white/10 flex flex-col">
+                            <div class="h-8 bg-dark-850 px-4 flex items-center justify-between border-b border-white/5">
+                                <span class="text-[11px] font-mono text-slate-400 flex items-center space-x-2">
+                                    <i data-lucide="terminal" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                    <span>Automaton Terminal & CLI Engine</span>
+                                </span>
+                                <span class="text-[10px] text-slate-500 font-mono">NODE v20.11.0</span>
+                            </div>
+                            <div class="flex-1 p-3 font-mono text-xs text-emerald-400 overflow-y-auto space-y-1">
+                                <p class="text-slate-500">[INFO] Petable Automaton AI Sandbox Initialized.</p>
+                                <p class="text-purple-400">&gt; petable-ai deploy --target vercel --prod</p>
+                                <p class="text-slate-300">[10:14:02] Building production bundle...</p>
+                                <p class="text-emerald-400">✔ Success: Application compiled and live at https://petable-build.vercel.app</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ================= VIEW 5: AI MARKETPLACE & PLUGINS ================= -->
+            <template x-if="currentView === 'marketplace'">
+                <div class="flex-1 p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+                    <div class="border-b border-white/10 pb-6 mb-6">
+                        <h1 class="text-2xl font-bold text-white">Petable AI Marketplace</h1>
+                        <p class="text-xs text-slate-400 mt-1">Discover, install, and share custom AI Agents, Templates, Plugins, and Workflow Automations.</p>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="flex space-x-2 mb-6 border-b border-white/10 pb-3">
+                        <button class="px-4 py-1.5 rounded-xl bg-purple-600 text-white text-xs font-semibold">All Items</button>
+                        <button class="px-4 py-1.5 rounded-xl bg-dark-900 text-slate-400 hover:text-white text-xs font-semibold border border-white/5">Agents</button>
+                        <button class="px-4 py-1.5 rounded-xl bg-dark-900 text-slate-400 hover:text-white text-xs font-semibold border border-white/5">Templates</button>
+                        <button class="px-4 py-1.5 rounded-xl bg-dark-900 text-slate-400 hover:text-white text-xs font-semibold border border-white/5">Plugins & Integrations</button>
+                    </div>
+
+                    <!-- Marketplace Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <template x-for="item in marketplaceList" :key="item.title">
+                            <div class="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-white text-sm" x-text="item.title.substring(0,2)"></div>
+                                        <div>
+                                            <h3 class="text-sm font-bold text-white" x-text="item.title"></h3>
+                                            <p class="text-[10px] text-purple-400 font-medium" x-text="item.author"></p>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-slate-400 mb-4" x-text="item.desc"></p>
+                                </div>
+                                <div class="pt-3 border-t border-white/5 flex items-center justify-between">
+                                    <span class="text-xs font-bold text-white" x-text="item.price"></span>
+                                    <button @click="installMarketplacePlugin(item.title)" class="px-3 py-1.5 rounded-xl bg-purple-600/20 text-purple-300 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-medium transition">
+                                        1-Click Install
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ================= VIEW 6: ANALYTICS & TOKEN METRICS ================= -->
+            <template x-if="currentView === 'analytics'">
+                <div class="flex-1 p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+                    <div class="border-b border-white/10 pb-6 mb-6">
+                        <h1 class="text-2xl font-bold text-white">Platform Analytics & Execution Metrics</h1>
+                        <p class="text-xs text-slate-400 mt-1">Real-time performance metrics, token consumption, and system response latencies.</p>
+                    </div>
+
+                    <!-- Metrics Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                            <p class="text-xs font-medium text-slate-400">Total Projects Created</p>
+                            <h3 class="text-2xl font-bold text-white mt-1">1,482</h3>
+                            <span class="text-[10px] text-emerald-400 font-medium">↑ +18% from last month</span>
+                        </div>
+                        <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                            <p class="text-xs font-medium text-slate-400">Active Agent Executions</p>
+                            <h3 class="text-2xl font-bold text-white mt-1">48.2k</h3>
+                            <span class="text-[10px] text-emerald-400 font-medium">↑ Unlimited Subscription Seat</span>
+                        </div>
+                        <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                            <p class="text-xs font-medium text-slate-400">Average Build Time</p>
+                            <h3 class="text-2xl font-bold text-white mt-1">4.2s</h3>
+                            <span class="text-[10px] text-purple-400 font-medium">⚡ Ultra-fast GPU Pipeline</span>
+                        </div>
+                        <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                            <p class="text-xs font-medium text-slate-400">Deployment Uptime</p>
+                            <h3 class="text-2xl font-bold text-white mt-1">99.99%</h3>
+                            <span class="text-[10px] text-emerald-400 font-medium">Global Edge Network</span>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Graph Canvas -->
+                    <div class="glass-panel p-6 rounded-2xl border border-white/10">
+                        <h3 class="text-sm font-bold text-white mb-4">Daily Token Generation & Execution Density</h3>
+                        <div class="h-64 flex items-center justify-center text-slate-500 font-mono text-xs border border-white/5 rounded-xl bg-dark-950/50">
+                            [ Real-Time Analytics Stream Graph Rendering ]
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ================= VIEW 7: ADMIN CONTROL PANEL ================= -->
+            <template x-if="currentView === 'admin'">
+                <div class="flex-1 p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+                    <div class="border-b border-white/10 pb-6 mb-6">
+                        <h1 class="text-2xl font-bold text-white">System Admin & Enterprise Control</h1>
+                        <p class="text-xs text-slate-400 mt-1">Manage platform users, system API keys, enterprise features, and security audit logs.</p>
+                    </div>
+
+                    <!-- Admin User Management Table -->
+                    <div class="glass-panel rounded-2xl border border-white/10 overflow-hidden mb-6">
+                        <div class="p-4 bg-dark-900 border-b border-white/10 flex items-center justify-between">
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Active Platform Users</h3>
+                            <span class="px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold">12,490 Total Users</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-dark-950 text-slate-400 font-mono uppercase text-[10px] border-b border-white/10">
+                                    <tr>
+                                        <th class="p-3">User</th>
+                                        <th class="p-3">Plan</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3">Projects</th>
+                                        <th class="p-3">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5 text-slate-300">
+                                    <tr>
+                                        <td class="p-3 font-semibold text-white">alex.rivera@petable.ai</td>
+                                        <td class="p-3"><span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Business Plan</span></td>
+                                        <td class="p-3 text-emerald-400">Active</td>
+                                        <td class="p-3">34</td>
+                                        <td class="p-3"><button class="text-purple-400 hover:underline">Manage</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold text-white">dev.lead@cybertech.io</td>
+                                        <td class="p-3"><span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px]">Enterprise Tier</span></td>
+                                        <td class="p-3 text-emerald-400">Active</td>
+                                        <td class="p-3">128</td>
+                                        <td class="p-3"><button class="text-purple-400 hover:underline">Manage</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ================= VIEW 8: PRICING & SUBSCRIPTION (NO CREDIT SYSTEM) ================= -->
+            <template x-if="currentView === 'pricing'">
+                <div class="flex-1 p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+                    <div class="text-center max-w-2xl mx-auto mb-10">
+                        <span class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 text-xs font-semibold border border-purple-500/30">Simple Transparent Pricing</span>
+                        <h1 class="text-3xl font-bold text-white mt-3">Unlimited AI Generations & Seats</h1>
+                        <p class="text-xs lg:text-sm text-slate-400 mt-2">No pay-per-credit system. Choose a flat tier for your team or personal development.</p>
+                    </div>
+
+                    <!-- Pricing Cards Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <!-- Free Plan -->
+                        <div class="glass-panel p-6 rounded-2xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Free Starter</h3>
+                                <p class="text-xs text-slate-400 mt-1">Explore basic agent capabilities.</p>
+                                <div class="my-4">
+                                    <span class="text-3xl font-extrabold text-white">$0</span>
+                                    <span class="text-xs text-slate-500">/ forever</span>
+                                </div>
+                                <ul class="space-y-2 text-xs text-slate-300 mb-6">
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>1 Active Project</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Standard Agents</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Community Support</span></li>
+                                </ul>
+                            </div>
+                            <button @click="openAuthModal()" class="w-full py-2 rounded-xl bg-dark-800 text-slate-200 border border-white/10 font-semibold text-xs hover:bg-dark-750 transition">Get Started Free</button>
+                        </div>
+
+                        <!-- Pro Plan -->
+                        <div class="glass-panel p-6 rounded-2xl border border-purple-500/40 bg-purple-950/10 flex flex-col justify-between relative shadow-2xl">
+                            <span class="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white text-[9px] font-bold">MOST POPULAR</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Pro Developer</h3>
+                                <p class="text-xs text-slate-400 mt-1">For solo engineers and creators.</p>
+                                <div class="my-4">
+                                    <span class="text-3xl font-extrabold text-white">$29</span>
+                                    <span class="text-xs text-slate-400">/ month</span>
+                                </div>
+                                <ul class="space-y-2 text-xs text-slate-300 mb-6">
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Unlimited Projects</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>All 16 AI Agents</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Full IDE & Monaco Editor</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Export ZIP & GitHub Push</span></li>
+                                </ul>
+                            </div>
+                            <button @click="openAuthModal()" class="glow-button w-full py-2 rounded-xl text-white font-semibold text-xs">Upgrade to Pro</button>
+                        </div>
+
+                        <!-- Business Plan -->
+                        <div class="glass-panel p-6 rounded-2xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Business Team</h3>
+                                <p class="text-xs text-slate-400 mt-1">For growing teams & agencies.</p>
+                                <div class="my-4">
+                                    <span class="text-3xl font-extrabold text-white">$79</span>
+                                    <span class="text-xs text-slate-400">/ month</span>
+                                </div>
+                                <ul class="space-y-2 text-xs text-slate-300 mb-6">
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Everything in Pro</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>5 Team Seats Included</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Visual Workflow Builder</span></li>
+                                </ul>
+                            </div>
+                            <button @click="openAuthModal()" class="w-full py-2 rounded-xl bg-purple-600/20 text-purple-300 hover:bg-purple-600/30 border border-purple-500/30 font-semibold text-xs transition">Subscribe Business</button>
+                        </div>
+
+                        <!-- Enterprise Plan -->
+                        <div class="glass-panel p-6 rounded-2xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Enterprise</h3>
+                                <p class="text-xs text-slate-400 mt-1">Custom infrastructure & SLAs.</p>
+                                <div class="my-4">
+                                    <span class="text-3xl font-extrabold text-white">Custom</span>
+                                </div>
+                                <ul class="space-y-2 text-xs text-slate-300 mb-6">
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>On-Premise Deployment</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Custom AI Agent Fine-tuning</span></li>
+                                    <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>24/7 Priority SLA</span></li>
+                                </ul>
+                            </div>
+                            <button @click="openAuthModal()" class="w-full py-2 rounded-xl bg-dark-800 text-slate-200 border border-white/10 font-semibold text-xs hover:bg-dark-750 transition">Contact Enterprise</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ================= VIEW 9: SETTINGS ================= -->
+            <template x-if="currentView === 'settings'">
+                <div class="flex-1 p-6 lg:p-8 overflow-y-auto max-w-4xl mx-auto w-full">
+                    <div class="border-b border-white/10 pb-6 mb-6">
+                        <h1 class="text-2xl font-bold text-white">Workspace & Engine Settings</h1>
+                        <p class="text-xs text-slate-400 mt-1">Configure API keys, model behaviors, and sandbox execution environments.</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="glass-panel p-5 rounded-2xl border border-white/10">
+                            <h3 class="text-sm font-bold text-white mb-3">API Keys & Integrations</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-xs text-slate-400 block mb-1">Custom OpenAI / Anthropic Key</label>
+                                    <input type="password" value="sk-petable-************************" class="w-full bg-dark-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-purple-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+        </main>
+
+        <!-- COMMAND PALETTE (MODAL Cmd+K) -->
+        <div x-show="commandPaletteOpen" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-start justify-center pt-24 px-4" x-transition>
+            <div @click.away="commandPaletteOpen = false" class="w-full max-w-xl glass-panel rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+                <div class="p-3 border-b border-white/10 flex items-center space-x-2">
+                    <i data-lucide="search" class="w-4 h-4 text-purple-400"></i>
+                    <input type="text" placeholder="Type a command or search project..." class="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none font-sans">
+                    <kbd class="px-2 py-0.5 text-[10px] bg-dark-800 border border-white/10 rounded text-slate-400">ESC</kbd>
+                </div>
+                <div class="p-2 space-y-1">
+                    <button @click="currentView = 'workspace'; commandPaletteOpen = false" class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-purple-600/20 hover:text-white rounded-xl flex items-center justify-between">
+                        <span class="flex items-center space-x-2"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i><span>Open AI Studio Prompt Hub</span></span>
+                        <span class="text-[10px] text-slate-500 font-mono">⌘1</span>
+                    </button>
+                    <button @click="currentView = 'agents'; commandPaletteOpen = false" class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-purple-600/20 hover:text-white rounded-xl flex items-center justify-between">
+                        <span class="flex items-center space-x-2"><i data-lucide="cpu" class="w-3.5 h-3.5 text-blue-400"></i><span>View 16 AI Agents Mesh</span></span>
+                        <span class="text-[10px] text-slate-500 font-mono">⌘2</span>
+                    </button>
+                    <button @click="currentView = 'workflow'; commandPaletteOpen = false" class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-purple-600/20 hover:text-white rounded-xl flex items-center justify-between">
+                        <span class="flex items-center space-x-2"><i data-lucide="git-merge" class="w-3.5 h-3.5 text-emerald-400"></i><span>Open Visual Workflow Canvas</span></span>
+                        <span class="text-[10px] text-slate-500 font-mono">⌘3</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUTH MODAL -->
+        <div x-show="authModalOpen" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4" x-transition>
+            <div @click.away="authModalOpen = false" class="w-full max-w-md glass-panel p-6 rounded-3xl border border-white/10 shadow-2xl relative">
+                <button @click="authModalOpen = false" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mx-auto mb-3">
+                        <i data-lucide="bot" class="w-6 h-6 text-purple-400"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Petable Automaton AI Account</h2>
+                    <p class="text-xs text-slate-400 mt-1">Sign in to save projects, sync agents, and deploy to production.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <button @click="userLoggedIn = true; authModalOpen = false" class="w-full py-2.5 rounded-xl bg-dark-900 border border-white/10 hover:border-purple-500/50 text-xs font-semibold text-slate-200 flex items-center justify-center space-x-2 transition">
+                        <i data-lucide="chrome" class="w-4 h-4 text-blue-400"></i>
+                        <span>Continue with Google</span>
+                    </button>
+                    <button @click="userLoggedIn = true; authModalOpen = false" class="w-full py-2.5 rounded-xl bg-dark-900 border border-white/10 hover:border-purple-500/50 text-xs font-semibold text-slate-200 flex items-center justify-center space-x-2 transition">
+                        <i data-lucide="github" class="w-4 h-4 text-purple-400"></i>
+                        <span>Continue with GitHub</span>
+                    </button>
+                    <div class="relative my-4 text-center">
+                        <span class="bg-dark-900 px-3 text-[10px] text-slate-500 uppercase tracking-wider">or email sign in</span>
+                        <div class="absolute inset-x-0 top-1/2 -z-10 border-t border-white/10"></div>
+                    </div>
+                    <input type="email" placeholder="name@company.com" class="w-full bg-dark-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+                    <button @click="userLoggedIn = true; authModalOpen = false" class="glow-button w-full py-2.5 rounded-xl text-xs font-semibold text-white">Sign In with Email</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT APPLICATION STATE MANAGEMENT -->
+    <script>
+        function automatonApp() {
+            return {
+                currentView: 'workspace',
+                userLoggedIn: false,
+                authModalOpen: false,
+                commandPaletteOpen: false,
+                voiceActive: false,
+                activePreviewDevice: 'desktop',
+                userPrompt: '',
+                isGenerating: false,
+                activeAgentStepName: 'Idle',
+                uploadedFiles: [],
+                activeFileName: 'index.html',
+                activeFileContent: `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Friends Cafe Rohtak | Best Café & Fast Food in Sector 14</title>
-  <meta name="description" content="Friends Cafe in Sector 14, Rohtak serves coffee, café food, pizza, burgers, shakes, pasta, snacks, takeaway, and home delivery. A stylish student hangout spot for friends and families." />
-  <meta name="keywords" content="Friends Cafe, Rohtak cafe, Sector 14 Rohtak, coffee, fast food, pizza, burgers, shakes, takeaway, home delivery, student hangout" />
-  <meta property="og:title" content="Friends Cafe Rohtak | Best Café & Fast Food in Sector 14" />
-  <meta property="og:description" content="Good Food • Great Coffee • Better Moments at Friends Cafe, Sector 14, Rohtak. A youthful café for students, friends, couples, and casual diners." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Friends Cafe Rohtak | Best Café & Fast Food in Sector 14" />
-  <meta name="twitter:description" content="Coffee, burgers, pizza, fries, shakes, pasta, takeaway, and delivery at Friends Cafe in Sector 14, Rohtak." />
-  <meta name="twitter:image" content="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brown: {
-              950: '#1a0f0a',
-              900: '#2b1710',
-              800: '#4b2a1e',
-              700: '#6a3c26',
-              600: '#8b4c2d'
-            },
-            cream: '#f7efe6',
-            orange: {
-              500: '#f28b30',
-              600: '#dd6f14'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Playfair Display', 'serif']
-          },
-          boxShadow: {
-            premium: '0 20px 60px rgba(26, 15, 10, 0.18)',
-            soft: '0 12px 40px rgba(26, 15, 10, 0.12)'
-          },
-          backgroundImage: {
-            hero: "linear-gradient(135deg, rgba(26,15,10,.82), rgba(75,42,30,.55)), url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1600&q=80')",
-            cafe: "linear-gradient(135deg, rgba(26,15,10,.55), rgba(26,15,10,.2)), url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80')"
-          }
-        }
-      }
-    }
-  </script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    html { scroll-behavior: smooth; }
-    body { background: #f7efe6; color: #1a0f0a; }
-    .glass { backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); background: rgba(255,255,255,0.14); }
-    .section-fade { opacity: 0; transform: translateY(18px); transition: all .8s ease; }
-    .section-fade.in-view { opacity: 1; transform: translateY(0); }
-    .text-shadow { text-shadow: 0 10px 30px rgba(0,0,0,.35); }
-    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    ::selection { background: #f28b30; color: white; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Autonomous Fitness SaaS</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
 </head>
-<body class="font-sans antialiased overflow-x-hidden">
-
-  <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-3">
-    <a href="tel:+910000000000" class="group flex items-center gap-3 rounded-full bg-brown-900 text-white shadow-premium px-4 py-3 hover:bg-orange-500 transition-all" aria-label="Call Friends Cafe">
-      <i data-lucide="phone-call" class="w-5 h-5"></i>
-      <span class="text-sm font-semibold">Call</span>
-    </a>
-    <a href="https://wa.me/910000000000" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3 rounded-full bg-green-500 text-white shadow-premium px-4 py-3 hover:bg-green-600 transition-all" aria-label="WhatsApp order Friends Cafe">
-      <i data-lucide="message-circle-more" class="w-5 h-5"></i>
-      <span class="text-sm font-semibold">WhatsApp</span>
-    </a>
-  </div>
-
-  <header class="sticky top-0 z-40 bg-[#f7efe6]/85 backdrop-blur-xl border-b border-black/5">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="h-20 flex items-center justify-between">
-        <a href="#home" class="flex items-center gap-3 group">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brown-900 to-orange-500 flex items-center justify-center shadow-soft">
-            <span class="text-white font-black text-lg">F</span>
-          </div>
-          <div>
-            <p class="font-display text-xl md:text-2xl font-bold text-brown-950 leading-none">Friends Cafe</p>
-            <p class="text-xs text-brown-700">Sector 14, Rohtak</p>
-          </div>
-        </a>
-
-        <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-brown-800">
-          <a href="#home" class="hover:text-orange-600 transition-colors">Home</a>
-          <a href="#about" class="hover:text-orange-600 transition-colors">About</a>
-          <a href="#menu" class="hover:text-orange-600 transition-colors">Menu</a>
-          <a href="#gallery" class="hover:text-orange-600 transition-colors">Gallery</a>
-          <a href="#offers" class="hover:text-orange-600 transition-colors">Offers</a>
-          <a href="#contact" class="hover:text-orange-600 transition-colors">Contact</a>
-        </nav>
-
-        <div class="hidden md:flex items-center gap-3">
-          <a href="tel:+910000000000" class="px-4 py-2.5 rounded-full border border-brown-900/10 text-brown-900 font-semibold hover:bg-brown-900 hover:text-white transition-all">Call Now</a>
-          <a href="https://wa.me/910000000000" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-full bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-all shadow-soft">Order Now</a>
-        </div>
-
-        <button id="menuBtn" class="lg:hidden w-11 h-11 rounded-2xl bg-white shadow-soft flex items-center justify-center" aria-label="Open menu">
-          <i data-lucide="menu" class="w-5 h-5"></i>
-        </button>
+<body class="bg-slate-950 text-white font-sans p-8">
+  <div class="max-w-4xl mx-auto text-center space-y-6">
+    <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs border border-purple-500/30">Built by Petable Automaton AI</span>
+    <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">PulseFit Autonomous Fitness Dashboard</h1>
+    <p class="text-slate-400 text-sm">Real-time AI biometric telemetry & automated workout optimization.</p>
+    
+    <div class="grid grid-cols-3 gap-4 mt-8">
+      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+        <p class="text-slate-400 text-xs">Heart Rate Target</p>
+        <p class="text-3xl font-bold text-emerald-400 mt-2">142 BPM</p>
       </div>
-
-      <div id="mobileMenu" class="lg:hidden hidden pb-5">
-        <div class="grid gap-2 rounded-3xl bg-white shadow-soft p-3">
-          <a href="#home" class="px-4 py-3 rounded-2xl hover:bg-cream">Home</a>
-          <a href="#about" class="px-4 py-3 rounded-2xl hover:bg-cream">About</a>
-          <a href="#menu" class="px-4 py-3 rounded-2xl hover:bg-cream">Menu</a>
-          <a href="#gallery" class="px-4 py-3 rounded-2xl hover:bg-cream">Gallery</a>
-          <a href="#offers" class="px-4 py-3 rounded-2xl hover:bg-cream">Offers</a>
-          <a href="#contact" class="px-4 py-3 rounded-2xl hover:bg-cream">Contact</a>
-        </div>
+      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+        <p class="text-slate-400 text-xs">Calories Burned</p>
+        <p class="text-3xl font-bold text-purple-400 mt-2">850 kcal</p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+        <p class="text-slate-400 text-xs">AI Performance Score</p>
+        <p class="text-3xl font-bold text-blue-400 mt-2">98.4%</p>
       </div>
     </div>
-  </header>
-
-  <main>
-    <section id="home" class="relative min-h-[92vh] flex items-center bg-hero bg-cover bg-center">
-      <div class="absolute inset-0 bg-gradient-to-t from-brown-950/70 via-brown-950/40 to-transparent"></div>
-      <div class="absolute top-6 left-6 md:top-8 md:left-8 glass text-white rounded-full px-4 py-2 border border-white/15 shadow-soft">
-        <span class="flex items-center gap-2 text-sm font-semibold"><i data-lucide="map-pin" class="w-4 h-4"></i> Sector 14, Rohtak</span>
-      </div>
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
-        <div class="max-w-3xl text-white">
-          <div class="inline-flex items-center gap-2 glass rounded-full px-4 py-2 border border-white/10 mb-6">
-            <i data-lucide="sparkles" class="w-4 h-4 text-orange-300"></i>
-            <span class="text-sm font-semibold">Youthful café vibes for friends, students & families</span>
-          </div>
-          <h1 class="font-display text-5xl sm:text-6xl lg:text-8xl font-bold tracking-tight text-shadow">Friends Cafe</h1>
-          <p class="mt-5 text-lg sm:text-xl md:text-2xl font-medium text-white/90">Good Food • Great Coffee • Better Moments</p>
-          <p class="mt-5 max-w-2xl text-white/82 text-base sm:text-lg leading-8">A stylish hangout in Sector 14, Rohtak for coffee runs, burger cravings, pizza nights, study breaks, and unforgettable catch-ups.</p>
-
-          <div class="mt-8 flex flex-wrap gap-4">
-            <a href="tel:+910000000000" class="px-6 py-3.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-premium transition-all">Call Now</a>
-            <a href="https://www.google.com/maps/search/Sector+14,+Rohtak,+Haryana,+India" target="_blank" rel="noopener noreferrer" class="px-6 py-3.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold transition-all">Get Directions</a>
-            <a href="https://wa.me/910000000000?text=Hi%20Friends%20Cafe%2C%20I%20want%20to%20place%20an%20order." target="_blank" rel="noopener noreferrer" class="px-6 py-3.5 rounded-full bg-green-500 hover:bg-green-600 text-white font-semibold transition-all">Order on WhatsApp</a>
-          </div>
-
-          <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
-            <div class="glass rounded-2xl p-4 border border-white/10"><p class="text-2xl font-bold">01</p><p class="text-sm text-white/80">Premium vibes</p></div>
-            <div class="glass rounded-2xl p-4 border border-white/10"><p class="text-2xl font-bold">Fresh</p><p class="text-sm text-white/80">Prepared daily</p></div>
-            <div class="glass rounded-2xl p-4 border border-white/10"><p class="text-2xl font-bold">Quick</p><p class="text-sm text-white/80">Service ready</p></div>
-            <div class="glass rounded-2xl p-4 border border-white/10"><p class="text-2xl font-bold">Tasty</p><p class="text-sm text-white/80">Always Instagram-worthy</p></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="about" class="py-20 sm:py-24 section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <p class="text-orange-600 font-semibold uppercase tracking-[0.25em] text-sm">About Friends Cafe</p>
-            <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold text-brown-950">A warm, stylish café built for everyday hangouts</h2>
-            <p class="mt-6 text-brown-800 leading-8 text-lg">Friends Cafe is a popular hangout spot in Sector 14, Rohtak, offering delicious café food, beverages, and a relaxed atmosphere. Whether you’re meeting friends, studying, enjoying a coffee break, or ordering takeaway, Friends Cafe provides fresh food, quick service, and a welcoming café experience.</p>
-            <div class="mt-8 grid sm:grid-cols-2 gap-4">
-              <div class="flex items-start gap-4 p-4 rounded-3xl bg-white shadow-soft border border-black/5"><i data-lucide="graduation-cap" class="w-6 h-6 text-orange-500 mt-1"></i><div><h3 class="font-semibold text-brown-950">Student Friendly</h3><p class="text-sm text-brown-700">Comfortable seating and value meals.</p></div></div>
-              <div class="flex items-start gap-4 p-4 rounded-3xl bg-white shadow-soft border border-black/5"><i data-lucide="wifi" class="w-6 h-6 text-orange-500 mt-1"></i><div><h3 class="font-semibold text-brown-950">Free Wi-Fi</h3><p class="text-sm text-brown-700">Perfect for study sessions and work.</p></div></div>
-              <div class="flex items-start gap-4 p-4 rounded-3xl bg-white shadow-soft border border-black/5"><i data-lucide="package-check" class="w-6 h-6 text-orange-500 mt-1"></i><div><h3 class="font-semibold text-brown-950">Takeaway Available</h3><p class="text-sm text-brown-700">Fast pickup for busy days.</p></div></div>
-              <div class="flex items-start gap-4 p-4 rounded-3xl bg-white shadow-soft border border-black/5"><i data-lucide="motorcycle" class="w-6 h-6 text-orange-500 mt-1"></i><div><h3 class="font-semibold text-brown-950">Home Delivery</h3><p class="text-sm text-brown-700">Hot, fresh, and delivered with care.</p></div></div>
-              <div class="flex items-start gap-4 p-4 rounded-3xl bg-white shadow-soft border border-black/5 sm:col-span-2"><i data-lucide="armchair" class="w-6 h-6 text-orange-500 mt-1"></i><div><h3 class="font-semibold text-brown-950">Cozy Café Ambience</h3><p class="text-sm text-brown-700">Soft lighting, glassmorphism interiors, and a relaxed space for conversations.</p></div></div>
-            </div>
-          </div>
-          <div class="relative">
-            <div class="rounded-[2rem] overflow-hidden shadow-premium min-h-[520px] bg-cafe bg-cover bg-center"></div>
-            <div class="absolute -bottom-6 -left-6 glass border border-white/20 rounded-3xl p-5 shadow-premium max-w-xs">
-              <p class="text-white font-semibold">Premium café experience</p>
-              <p class="text-white/75 text-sm mt-1">For students, families, and casual diners in Rohtak.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="menu" class="py-20 sm:py-24 bg-white section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p class="text-orange-600 font-semibold uppercase tracking-[0.25em] text-sm">Signature Menu</p>
-            <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold text-brown-950">Coffee, comfort food, and crowd favourites</h2>
-          </div>
-          <p class="max-w-2xl text-brown-700">Beautifully crafted menu cards with premium imagery, hover motion, and quick highlights for the items your customers will keep coming back for.</p>
-        </div>
-
-        <div class="mt-12 space-y-14">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <h3 class="text-2xl font-bold text-brown-950">Coffee &amp; Beverages</h3>
-              <span class="text-sm text-brown-600">Refresh, sip, repeat</span>
-            </div>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              <div class="group rounded-[1.75rem] overflow-hidden bg-cream shadow-soft border border-black/5 hover:-translate-y-1 transition-all">
-                <div class="relative h-52"><img loading="lazy" src="https://images.unsplash.com/photo-1495774856032-8b90bbb32b32?auto=format&fit=crop&w=900&q=80" alt="Cold coffee" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"><span class="absolute top-4 left-4 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">Best Seller</span></div>
-                <div class="p-5"><h4 class="font-bold text-lg">Cold Coffee</h4><p class="text-sm text-brown-700 mt-1 line-clamp-2">Chilled, creamy, and café-style favorite.</p></div>
-              </div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-cream shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-52"><img loading="lazy" src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=900&q=80" alt="Cappuccino" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-5"><h4 class="font-bold text-lg">Cappuccino</h4><p class="text-sm text-brown-700 mt-1">Rich espresso with creamy foam.</p></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-cream shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-52"><img loading="lazy" src="https://images.unsplash.com/photo-1561882468-9110e03e0f78?auto=format&fit=crop&w=900&q=80" alt="Latte" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-5"><h4 class="font-bold text-lg">Latte</h4><p class="text-sm text-brown-700 mt-1">Smooth, comforting, and elegant.</p></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-cream shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-52"><img loading="lazy" src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=900&q=80" alt="Chocolate shake" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-5"><h4 class="font-bold text-lg">Chocolate Shake</h4><p class="text-sm text-brown-700 mt-1">Thick, indulgent, and satisfying.</p></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-cream shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-52"><img loading="lazy" src="https://images.unsplash.com/photo-1517701550927-30cf4ba1f54f?auto=format&fit=crop&w=900&q=80" alt="Espresso" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-5"><h4 class="font-bold text-lg">Espresso</h4><p class="text-sm text-brown-700 mt-1">Bold and concentrated coffee shot.</p></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-cream shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-52"><img loading="lazy" src="https://images.unsplash.com/photo-1571934811356-5cc061b6821f?auto=format&fit=crop&w=900&q=80" alt="Oreo shake" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-5"><h4 class="font-bold text-lg">Oreo Shake</h4><p class="text-sm text-brown-700 mt-1">Creamy, crunchy, and fun.</p></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-cream shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-52"><img loading="lazy" src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=80" alt="Mocktails" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-5"><h4 class="font-bold text-lg">Mocktails</h4><p class="text-sm text-brown-700 mt-1">Refreshing sips for every mood.</p></div></div>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <h3 class="text-2xl font-bold text-brown-950">Burgers &amp; Sandwiches</h3>
-              <span class="text-sm text-brown-600">Bites with big flavour</span>
-            </div>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80" alt="Veg burger" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Veg Burger</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=900&q=80" alt="Cheese burger" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Cheese Burger</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1633436374961-09b92742047d?auto=format&fit=crop&w=900&q=80" alt="Paneer burger" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Paneer Burger</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=900&q=80" alt="Club sandwich" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Club Sandwich</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1528735602780-4f4f1b7f4f5f?auto=format&fit=crop&w=900&q=80" alt="Grilled sandwich" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Grilled Sandwich</h4></div></div>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <h3 class="text-2xl font-bold text-brown-950">Pizza &amp; Pasta</h3>
-              <span class="text-sm text-brown-600">Made for sharing</span>
-            </div>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80" alt="Margherita pizza" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Margherita Pizza</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1513104890138-2a627b5f3b79?auto=format&fit=crop&w=900&q=80" alt="Farmhouse pizza" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Farmhouse Pizza</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=900&q=80" alt="Cheese pizza" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Cheese Pizza</h4><p class="text-xs mt-1 text-orange-600 font-bold">Best Seller</p></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80" alt="White sauce pasta" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">White Sauce Pasta</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80" alt="Red sauce pasta" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Red Sauce Pasta</h4></div></div>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <h3 class="text-2xl font-bold text-brown-950">Snacks</h3>
-              <span class="text-sm text-brown-600">Quick cravings satisfied</span>
-            </div>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&w=900&q=80" alt="French fries" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">French Fries</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?auto=format&fit=crop&w=900&q=80" alt="Loaded fries" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Loaded Fries</h4><p class="text-xs mt-1 text-orange-600 font-bold">Best Seller</p></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=900&q=80" alt="Spring rolls" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Spring Rolls</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1594028465515-97d857a5f4cf?auto=format&fit=crop&w=900&q=80" alt="Momos" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Momos</h4></div></div>
-              <div class="group rounded-[1.75rem] overflow-hidden bg-white shadow-soft border border-black/5 hover:-translate-y-1 transition-all"><div class="h-44"><img loading="lazy" src="https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=900&q=80" alt="Garlic bread" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div><div class="p-4"><h4 class="font-bold">Garlic Bread</h4></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="py-20 sm:py-24 section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p class="text-orange-600 font-semibold uppercase tracking-[0.25em] text-sm">Why Choose Friends Cafe</p>
-        <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold text-brown-950">Designed for hangouts, quick bites, and good memories</h2>
-        <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div class="p-6 rounded-[1.75rem] bg-white shadow-soft border border-black/5"><i data-lucide="users" class="w-10 h-10 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Perfect Hangout Spot</h3><p class="mt-2 text-brown-700">A welcoming place for friends, couples, and family outings.</p></div>
-          <div class="p-6 rounded-[1.75rem] bg-white shadow-soft border border-black/5"><i data-lucide="chef-hat" class="w-10 h-10 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Freshly Prepared Food</h3><p class="mt-2 text-brown-700">Made with care for the best taste and quality every time.</p></div>
-          <div class="p-6 rounded-[1.75rem] bg-white shadow-soft border border-black/5"><i data-lucide="badge-indian-rupee" class="w-10 h-10 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Affordable Student Pricing</h3><p class="mt-2 text-brown-700">Delicious options that fit student budgets and group plans.</p></div>
-          <div class="p-6 rounded-[1.75rem] bg-white shadow-soft border border-black/5"><i data-lucide="sofa" class="w-10 h-10 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Relaxing Café Ambience</h3><p class="mt-2 text-brown-700">Comfortable seating and stylish interiors for every mood.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="py-20 sm:py-24 bg-white section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p class="text-orange-600 font-semibold uppercase tracking-[0.25em] text-sm">Customer Reviews</p>
-        <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold text-brown-950">Loved by locals, students, and regular café visitors</h2>
-        <div class="mt-10 grid md:grid-cols-3 gap-5">
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5">
-            <div class="flex gap-2 mb-4"><span class="px-3 py-1 rounded-full bg-orange-500 text-white text-xs font-semibold">Student Favourite</span></div>
-            <p class="text-lg font-medium text-brown-900">“Best café in Sector 14.”</p>
-            <p class="mt-3 text-brown-700">Great for hanging out after classes, with a cozy vibe and tasty food.</p>
-          </div>
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5">
-            <div class="flex gap-2 mb-4"><span class="px-3 py-1 rounded-full bg-brown-900 text-white text-xs font-semibold">Café Recommended</span></div>
-            <p class="text-lg font-medium text-brown-900">“Great coffee and quick service.”</p>
-            <p class="mt-3 text-brown-700">The cold coffee and snacks are always fresh, and service is fast.</p>
-          </div>
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5">
-            <div class="flex gap-2 mb-4"><span class="px-3 py-1 rounded-full bg-orange-600 text-white text-xs font-semibold">Local Favourite</span></div>
-            <p class="text-lg font-medium text-brown-900">“Perfect place to hang out with friends.”</p>
-            <p class="mt-3 text-brown-700">A stylish, affordable café for pizza nights, shakes, and celebrations.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="gallery" class="py-20 sm:py-24 section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between gap-4">
-          <div>
-            <p class="text-orange-600 font-semibold uppercase tracking-[0.25em] text-sm">Gallery</p>
-            <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold text-brown-950">Instagram-friendly moments from Friends Cafe</h2>
-          </div>
-        </div>
-        <div class="mt-10 columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5">
-          <button class="gallery-item break-inside-avoid w-full rounded-[1.75rem] overflow-hidden shadow-soft bg-white" data-src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1400&q=80" aria-label="Open gallery image of coffee cups"><img loading="lazy" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=80" alt="Coffee cups" class="w-full h-auto object-cover"></button>
-          <button class="gallery-item break-inside-avoid w-full rounded-[1.75rem] overflow-hidden shadow-soft bg-white" data-src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1400&q=80" aria-label="Open gallery image of pizza"><img loading="lazy" src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80" alt="Pizza" class="w-full h-auto object-cover"></button>
-          <button class="gallery-item break-inside-avoid w-full rounded-[1.75rem] overflow-hidden shadow-soft bg-white" data-src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1400&q=80" aria-label="Open gallery image of burgers"><img loading="lazy" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80" alt="Burgers" class="w-full h-auto object-cover"></button>
-          <button class="gallery-item break-inside-avoid w-full rounded-[1.75rem] overflow-hidden shadow-soft bg-white" data-src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1400&q=80" aria-label="Open gallery image of pasta"><img loading="lazy" src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80" alt="Pasta" class="w-full h-auto object-cover"></button>
-          <button class="gallery-item break-inside-avoid w-full rounded-[1.75rem] overflow-hidden shadow-soft bg-white" data-src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=1400&q=80" aria-label="Open gallery image of shakes"><img loading="lazy" src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=900&q=80" alt="Shakes" class="w-full h-auto object-cover"></button>
-          <button class="gallery-item break-inside-avoid w-full rounded-[1.75rem] overflow-hidden shadow-soft bg-white" data-src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1400&q=80" aria-label="Open gallery image of café seating"><img loading="lazy" src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=900&q=80" alt="Café seating" class="w-full h-auto object-cover"></button>
-          <button class="gallery-item break-inside-avoid w-full rounded-[1.75rem] overflow-hidden shadow-soft bg-white" data-src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1400&q=80" aria-label="Open gallery image of friends enjoying food"><img loading="lazy" src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=80" alt="Friends enjoying food" class="w-full h-auto object-cover"></button>
-          <button class="gallery-item break-inside-avoid w-full rounded-[1.75rem] overflow-hidden shadow-soft bg-white" data-src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1400&q=80" aria-label="Open gallery image of evening ambience"><img loading="lazy" src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=900&q=80" alt="Evening ambience" class="w-full h-auto object-cover"></button>
-        </div>
-      </div>
-    </section>
-
-    <section class="py-20 sm:py-24 bg-white section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p class="text-orange-600 font-semibold uppercase tracking-[0.25em] text-sm">Services</p>
-        <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold text-brown-950">Flexible ways to enjoy Friends Cafe</h2>
-        <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5"><i data-lucide="utensils-crossed" class="w-9 h-9 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Dine-In</h3></div>
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5"><i data-lucide="shopping-bag" class="w-9 h-9 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Takeaway</h3></div>
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5"><i data-lucide="truck" class="w-9 h-9 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Home Delivery</h3></div>
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5"><i data-lucide="cup-soda" class="w-9 h-9 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Coffee &amp; Beverages</h3></div>
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5"><i data-lucide="pizza" class="w-9 h-9 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Snacks &amp; Fast Food</h3></div>
-          <div class="p-6 rounded-[1.75rem] bg-cream shadow-soft border border-black/5"><i data-lucide="users-round" class="w-9 h-9 text-orange-500"></i><h3 class="mt-4 text-xl font-bold">Group Orders</h3></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="offers" class="py-20 sm:py-24 section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="rounded-[2rem] bg-gradient-to-br from-brown-950 via-brown-900 to-orange-600 text-white overflow-hidden shadow-premium">
-          <div class="p-8 sm:p-12 lg:p-16 grid lg:grid-cols-[1.2fr_.8fr] gap-10 items-center">
-            <div>
-              <p class="text-orange-300 font-semibold uppercase tracking-[0.25em] text-sm">Offers</p>
-              <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold">Special deals made for every kind of plan</h2>
-              <p class="mt-5 text-white/80 max-w-2xl text-lg">Whether you’re planning a student treat, coffee break, group dinner, or birthday celebration, our offers are designed to make every visit more fun and affordable.</p>
-              <div class="mt-8 flex flex-wrap gap-4">
-                <a href="#contact" class="px-6 py-3.5 rounded-full bg-white text-brown-950 font-semibold hover:bg-cream transition-all">View Offers</a>
-                <a href="https://wa.me/910000000000" target="_blank" rel="noopener noreferrer" class="px-6 py-3.5 rounded-full bg-black/20 border border-white/10 font-semibold hover:bg-black/30 transition-all">Order on WhatsApp</a>
-              </div>
-            </div>
-            <div class="grid sm:grid-cols-2 gap-4">
-              <div class="glass rounded-3xl p-5 border border-white/15"><h3 class="font-bold text-xl">Student Combo Meals</h3><p class="mt-2 text-white/75 text-sm">Value-packed combos for everyday cravings.</p></div>
-              <div class="glass rounded-3xl p-5 border border-white/15"><h3 class="font-bold text-xl">Coffee + Snack Combo</h3><p class="mt-2 text-white/75 text-sm">Your perfect afternoon pick-me-up.</p></div>
-              <div class="glass rounded-3xl p-5 border border-white/15"><h3 class="font-bold text-xl">Group Party Orders</h3><p class="mt-2 text-white/75 text-sm">Ideal for friends and office gatherings.</p></div>
-              <div class="glass rounded-3xl p-5 border border-white/15"><h3 class="font-bold text-xl">Birthday Celebration Packages</h3><p class="mt-2 text-white/75 text-sm">Celebrate with food, vibes, and happy moments.</p></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="location" class="py-20 sm:py-24 bg-white section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p class="text-orange-600 font-semibold uppercase tracking-[0.25em] text-sm">Location</p>
-        <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold text-brown-950">Find Friends Cafe in Sector 14, Rohtak</h2>
-        <div class="mt-10 grid lg:grid-cols-2 gap-6 items-stretch">
-          <div class="rounded-[2rem] overflow-hidden shadow-premium min-h-[360px] bg-[linear-gradient(135deg,rgba(26,15,10,.65),rgba(242,139,48,.45)),url('https://images.unsplash.com/photo-1505843795480-8f8e929b79c5?auto=format&fit=crop&w=1400&q=80')] bg-cover bg-center flex items-end">
-            <div class="m-6 p-6 rounded-[1.5rem] bg-white/10 border border-white/20 backdrop-blur-xl text-white">
-              <p class="text-sm text-white/80">Map Placeholder</p>
-              <p class="text-2xl font-bold mt-1">Sector 14, Rohtak, Haryana, India</p>
-            </div>
-          </div>
-          <div class="rounded-[2rem] bg-cream p-8 shadow-soft border border-black/5 flex flex-col justify-between">
-            <div>
-              <h3 class="text-2xl font-bold text-brown-950">Visit us today</h3>
-              <p class="mt-3 text-brown-700 text-lg">Sector 14, Rohtak, Haryana, India.</p>
-              <div class="mt-6 space-y-3 text-brown-800">
-                <div class="flex items-center gap-3"><i data-lucide="map-pin" class="w-5 h-5 text-orange-500"></i><span>Sector 14, Rohtak, Haryana, India</span></div>
-                <div class="flex items-center gap-3"><i data-lucide="clock-3" class="w-5 h-5 text-orange-500"></i><span>Open Daily</span></div>
-              </div>
-            </div>
-            <div class="mt-8 flex flex-wrap gap-3">
-              <a href="https://www.google.com/maps/search/Sector+14,+Rohtak,+Haryana,+India" target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-full bg-brown-900 text-white font-semibold hover:bg-orange-500 transition-all">Get Directions</a>
-              <a href="tel:+910000000000" class="px-5 py-3 rounded-full border border-brown-900/10 bg-white font-semibold hover:bg-brown-900 hover:text-white transition-all">Call Cafe</a>
-              <a href="https://wa.me/910000000000?text=Hi%20Friends%20Cafe%2C%20I%20want%20to%20place%20an%20order." target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 transition-all">WhatsApp Order</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact" class="py-20 sm:py-24 section-fade">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-8 items-start">
-          <div>
-            <p class="text-orange-600 font-semibold uppercase tracking-[0.25em] text-sm">Contact</p>
-            <h2 class="mt-3 font-display text-3xl sm:text-5xl font-bold text-brown-950">Place an order or send an enquiry</h2>
-            <div class="mt-8 rounded-[2rem] bg-white shadow-soft border border-black/5 p-6 sm:p-8 space-y-4">
-              <div><p class="text-sm text-brown-600">Cafe Name</p><p class="text-lg font-bold text-brown-950">Friends Cafe</p></div>
-              <div><p class="text-sm text-brown-600">Location</p><p class="text-lg font-bold text-brown-950">Sector 14, Rohtak, Haryana</p></div>
-              <div><p class="text-sm text-brown-600">Hours</p><p class="text-lg font-bold text-brown-950">Open Daily</p></div>
-            </div>
-          </div>
-          <form class="rounded-[2rem] bg-white shadow-soft border border-black/5 p-6 sm:p-8" onsubmit="event.preventDefault(); alert('Thanks for your enquiry. Friends Cafe will contact you soon.');">
-            <div class="grid gap-5">
-              <div>
-                <label for="name" class="block text-sm font-semibold text-brown-800 mb-2">Name</label>
-                <input id="name" type="text" class="w-full rounded-2xl border border-black/10 px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-cream/60" placeholder="Your name" required>
-              </div>
-              <div>
-                <label for="phone" class="block text-sm font-semibold text-brown-800 mb-2">Phone Number</label>
-                <input id="phone" type="tel" class="w-full rounded-2xl border border-black/10 px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-cream/60" placeholder="Your phone number" required>
-              </div>
-              <div>
-                <label for="message" class="block text-sm font-semibold text-brown-800 mb-2">Message / Order</label>
-                <textarea id="message" rows="5" class="w-full rounded-2xl border border-black/10 px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-cream/60" placeholder="Tell us what you'd like to order or ask about..."></textarea>
-              </div>
-              <button type="submit" class="px-6 py-3.5 rounded-full bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-all shadow-soft">Send Enquiry</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="bg-brown-950 text-white pt-16 pb-28">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-3 gap-10">
-        <div>
-          <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-brown-700 flex items-center justify-center"><span class="text-white font-black text-lg">F</span></div>
-            <div>
-              <p class="font-display text-2xl font-bold">Friends Cafe</p>
-              <p class="text-white/60 text-sm">Sector 14, Rohtak</p>
-            </div>
-          </div>
-          <p class="mt-4 text-white/75 max-w-md">A premium café and fast food destination for students, friends, families, takeaway customers, and anyone looking for good food and great coffee.</p>
-        </div>
-
-        <div>
-          <h3 class="font-semibold text-lg">Quick Links</h3>
-          <div class="mt-4 grid gap-3 text-white/75">
-            <a href="#home" class="hover:text-orange-300">Home</a>
-            <a href="#menu" class="hover:text-orange-300">Menu</a>
-            <a href="#gallery" class="hover:text-orange-300">Gallery</a>
-            <a href="#offers" class="hover:text-orange-300">Offers</a>
-            <a href="#contact" class="hover:text-orange-300">Contact</a>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold text-lg">Follow Us</h3>
-          <div class="mt-4 flex gap-3">
-            <a href="#" class="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange-500 transition-colors" aria-label="Instagram"><i data-lucide="instagram" class="w-5 h-5"></i></a>
-            <a href="#" class="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange-500 transition-colors" aria-label="Facebook"><i data-lucide="facebook" class="w-5 h-5"></i></a>
-            <a href="https://wa.me/910000000000" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center hover:bg-green-500 transition-colors" aria-label="WhatsApp"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
-          </div>
-          <p class="mt-5 text-sm text-white/60">Call, order, or visit us for fresh café favourites.</p>
-        </div>
-      </div>
-
-      <div class="mt-12 pt-6 border-t border-white/10 text-sm text-white/55 flex flex-col sm:flex-row gap-3 justify-between">
-        <p>© 2026 Friends Cafe, Rohtak. All rights reserved.</p>
-        <p>Designed for dine-in, takeaway, and online orders.</p>
-      </div>
-    </div>
-  </footer>
-
-  <div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 p-4" role="dialog" aria-modal="true" aria-label="Image preview">
-    <button id="closeLightbox" class="absolute top-5 right-5 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20" aria-label="Close preview"><i data-lucide="x" class="w-5 h-5"></i></button>
-    <img id="lightboxImg" src="" alt="Preview" class="max-h-[88vh] max-w-[92vw] rounded-3xl shadow-premium object-contain">
   </div>
+</body>
+</html>`,
+                currentPreviewHtml: '',
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
+                starterPrompts: [
+                    { title: "SaaS Fitness App", subtitle: "Full-stack dashboard with real-time biometric mock", icon: "activity", prompt: "Build a complete SaaS fitness landing page with interactive biometric telemetry, dark theme, and glassmorphism styling." },
+                    { title: "Android / Flutter App", subtitle: "Cross-platform mobile UI codebase", icon: "smartphone", prompt: "Create a cross-platform Android & Flutter mobile UI layout with dark theme, smooth cards, and active tab bar." },
+                    { title: "Python Bot & AI Agent", subtitle: "Autonomous scraping & competitor research", icon: "bot", prompt: "Generate a complete Python script that fetches market competitor pricing and summarizes key updates automatically." },
+                    { title: "Chrome Extension UI", subtitle: "Productivity extension side-panel", icon: "extension", prompt: "Build a modern Chrome Extension popup UI with dark mode, bookmark management, and quick AI text summarizer." }
+                ],
 
-      const menuBtn = document.getElementById('menuBtn');
-      const mobileMenu = document.getElementById('mobileMenu');
-      menuBtn?.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-      mobileMenu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+                agentSteps: [
+                    { name: '1. Requirement Parsing', agent: 'CEO Agent', status: 'completed', time: '0.2s' },
+                    { name: '2. System Architecture Blueprint', agent: 'Architect Agent', status: 'completed', time: '0.4s' },
+                    { name: '3. UI/UX Design Token Injection', agent: 'UI Designer', status: 'completed', time: '0.5s' },
+                    { name: '4. Full-stack Code Synthesis', agent: 'Coding Agent', status: 'completed', time: '1.2s' },
+                    { name: '5. Vulnerability & QA Verification', agent: 'Security Agent', status: 'completed', time: '0.3s' },
+                    { name: '6. Live Sandbox Deployment', agent: 'Deployment Agent', status: 'completed', time: '0.6s' }
+                ],
 
-      const sections = document.querySelectorAll('.section-fade');
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
-      }, { threshold: 0.12 });
-      sections.forEach(s => observer.observe(s));
+                projectFiles: [
+                    { name: 'index.html', icon: 'code-2' },
+                    { name: 'app.js', icon: 'file-json' },
+                    { name: 'styles.css', icon: 'file-text' },
+                    { name: 'package.json', icon: 'box' }
+                ],
 
-      const lightbox = document.getElementById('lightbox');
-      const lightboxImg = document.getElementById('lightboxImg');
-      document.querySelectorAll('.gallery-item').forEach(btn => {
-        btn.addEventListener('click', () => {
-          lightboxImg.src = btn.dataset.src;
-          lightbox.classList.remove('hidden');
-          lightbox.classList.add('flex');
-        });
-      });
-      const closeLightbox = () => { lightbox.classList.add('hidden'); lightbox.classList.remove('flex'); lightboxImg.src = ''; };
-      document.getElementById('closeLightbox')?.addEventListener('click', closeLightbox);
-      lightbox?.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
-    });
-  </script>
+                workflowNodes: [
+                    { id: 1, type: 'Trigger', label: '1. HTTP Webhook / User Prompt', desc: 'Triggered upon new task description or external API call.', status: 'Active', latency: '12ms' },
+                    { id: 2, type: 'AI Decision Engine', label: '2. Multi-Agent CEO Orchestrator', desc: 'Evaluates task complexity & assigns coding tasks.', status: 'Active', latency: '120ms' },
+                    { id: 3, type: 'API Integration', label: '3. Dynamic Database Sync', desc: 'Executes SQL schema generation & connects REST APIs.', status: 'Active', latency: '45ms' },
+                    { id: 4, type: 'Deployment', label: '4. Live Edge Host Output', desc: 'Pushes production package to Vercel/GitHub Pages.', status: 'Ready', latency: '350ms' }
+                ],
+
+                agentSystemList: [
+                    { name: "CEO Agent", role: "Project planning & multi-agent orchestration", model: "Petable-Omni-v3", icon: "briefcase", status: "Ready" },
+                    { name: "Architect Agent", role: "Database schemas & system design", model: "Petable-Deep-Reason", icon: "box", status: "Ready" },
+                    { name: "Coding Agent", role: "Frontend & Backend code writing", model: "Petable-Code-Ultra", icon: "code", status: "Active" },
+                    { name: "UI Designer Agent", role: "Tailwind UI, Glassmorphism & Figma translation", model: "Petable-Vision-v2", icon: "palette", status: "Ready" },
+                    { name: "Testing Agent", role: "Automated unit testing & bug identification", model: "Petable-QA-Pro", icon: "check-circle-2", status: "Ready" },
+                    { name: "Security Agent", role: "Vulnerability scan & encrypted auth compliance", model: "Petable-Shield", icon: "shield", status: "Ready" },
+                    { name: "Research Agent", role: "Competitor data & live web scraping", model: "Petable-Search", icon: "search", status: "Ready" },
+                    { name: "Marketing Agent", role: "Copywriting, ad campaigns & launch posts", model: "Petable-Copy", icon: "sparkles", status: "Ready" }
+                ],
+
+                marketplaceList: [
+                    { title: "Full-Stack SaaS Starter", author: "by Petable AI", desc: "Complete Next.js + Tailwind + Stripe payment integration template.", price: "Free" },
+                    { title: "Android App Generator Plugin", author: "by MobileDevs", desc: "Automated Flutter & React Native code bundling with APK builder.", price: "$19" },
+                    { title: "Automated Competitor Spy Bot", author: "by AgentLab", desc: "Scrapes competitor pricing changes and sends daily Slack digests.", price: "Free" }
+                ],
+
+                initApp() {
+                    this.currentPreviewHtml = this.activeFileContent;
+                    setTimeout(() => { lucide.createIcons(); }, 100);
+                },
+
+                openAuthModal() {
+                    this.authModalOpen = true;
+                },
+
+                runAutomatonGeneration() {
+                    if (!this.userPrompt.trim() || this.isGenerating) return;
+                    this.isGenerating = true;
+
+                    // Reset steps status to active
+                    this.agentSteps.forEach((step, idx) => {
+                        step.status = idx === 0 ? 'active' : 'pending';
+                    });
+
+                    let currentStepIndex = 0;
+                    const stepInterval = setInterval(() => {
+                        if (currentStepIndex < this.agentSteps.length) {
+                            if (currentStepIndex > 0) {
+                                this.agentSteps[currentStepIndex - 1].status = 'completed';
+                            }
+                            this.agentSteps[currentStepIndex].status = 'active';
+                            this.activeAgentStepName = this.agentSteps[currentStepIndex].name;
+                            currentStepIndex++;
+                        } else {
+                            clearInterval(stepInterval);
+                            this.agentSteps[this.agentSteps.length - 1].status = 'completed';
+                            this.isGenerating = false;
+                            this.activeAgentStepName = 'Execution Complete';
+                            this.updatePreviewForPrompt(this.userPrompt);
+                        }
+                    }, 800);
+                },
+
+                updatePreviewForPrompt(prompt) {
+                    const promptLower = prompt.toLowerCase();
+                    if (promptLower.includes('android') || promptLower.includes('mobile')) {
+                        this.activePreviewDevice = 'mobile';
+                        this.currentPreviewHtml = `<!DOCTYPE html><html lang="en"><head><script src="https://cdn.tailwindcss.com"><\/script></head><body class="bg-slate-900 text-white p-6 font-sans"><div class="text-center space-y-4"><span class="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">Android Native Build</span><h2 class="text-2xl font-bold">Mobile App Live</h2><div class="bg-slate-800 p-4 rounded-xl border border-white/10 text-left space-y-2"><p class="text-xs text-slate-400">Status: Running Flutter Runtime</p><div class="h-2 bg-purple-600 rounded-full w-3/4"></div></div></div></body></html>`;
+                    } else if (promptLower.includes('python') || promptLower.includes('bot')) {
+                        this.currentPreviewHtml = `<!DOCTYPE html><html lang="en"><head><script src="https://cdn.tailwindcss.com"><\/script></head><body class="bg-black text-emerald-400 p-6 font-mono text-xs"><p>[SYSTEM] Initializing Python Autonomous Scraping Script...</p><p>[EXEC] Fetching target endpoints...</p><p class="text-white">✔ Complete: Processed 4,200 data records in 0.84s.</p></body></html>`;
+                    } else {
+                        this.currentPreviewHtml = `<!DOCTYPE html><html lang="en"><head><script src="https://cdn.tailwindcss.com"><\/script></head><body class="bg-slate-950 text-white p-8 font-sans"><div class="max-w-4xl mx-auto text-center space-y-6"><span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs">Petable Automaton AI Output</span><h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Autonomous SaaS Application</h1><p class="text-slate-400">Generated successfully for: "${prompt.substring(0, 45)}..."</p></div></body></html>`;
+                    }
+                },
+
+                selectActiveFile(file) {
+                    this.activeFileName = file.name;
+                    if (file.name === 'index.html') {
+                        this.activeFileContent = this.currentPreviewHtml;
+                    } else if (file.name === 'app.js') {
+                        this.activeFileContent = `// Petable Automaton AI Generated Script\nconsole.log("Petable Automaton Pipeline Online");\nfunction initApp() {\n  return { status: "Active" };\n}`;
+                    } else if (file.name === 'styles.css') {
+                        this.activeFileContent = `/* Custom Styles */\nbody {\n  margin: 0;\n  background: #07090e;\n}`;
+                    }
+                },
+
+                createNewFile() {
+                    const newName = prompt('Enter new file name (e.g. config.json):', 'config.json');
+                    if (newName) {
+                        this.projectFiles.push({ name: newName, icon: 'file-text' });
+                    }
+                },
+
+                addWorkflowNode(type) {
+                    const id = this.workflowNodes.length + 1;
+                    this.workflowNodes.push({
+                        id: id,
+                        type: type,
+                        label: `${id}. ${type} Action`,
+                        desc: 'Automated workflow step configured.',
+                        status: 'Active',
+                        latency: '25ms'
+                    });
+                },
+
+                executeWorkflow() {
+                    alert('Executing visual automation canvas pipeline...');
+                },
+
+                exportProject(type) {
+                    alert(`Preparing deployment package (${type.toUpperCase()})... Downloading source bundle.`);
+                },
+
+                triggerFileUpload() {
+                    this.uploadedFiles.push({ name: 'specs.pdf' });
+                },
+
+                toggleVoiceMode() {
+                    this.voiceActive = !this.voiceActive;
+                },
+
+                refreshPreview() {
+                    const frame = document.getElementById('previewFrame');
+                    if (frame) frame.srcdoc = this.currentPreviewHtml;
+                },
+
+                openInNewTab() {
+                    const win = window.open();
+                    win.document.write(this.currentPreviewHtml);
+                },
+
+                installMarketplacePlugin(name) {
+                    alert(`Successfully installed '${name}' into your Petable Automaton AI workspace!`);
+                },
+
+                configureAgent(agent) {
+                    alert(`Opening configuration panel for ${agent.name}...`);
+                },
+
+                triggerAllAgentSync() {
+                    alert('Syncing agent neural weights and project memory context...');
+                }
+            }
+        }
+    </script>
 </body>
 </html>
